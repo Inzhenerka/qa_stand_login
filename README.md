@@ -72,3 +72,28 @@ docker-compose up -d
 | age                   | Возраст            |
 | admin                 | Админ (true/false) |
 | description           | Описание           |
+
+## Развертывание на EC2 (AL2023)
+
+Установка Docker:
+
+```bash
+sudo dnf update -y
+sudo dnf install docker -y
+sudo systemctl start docker
+sudo systemctl enable docker
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+Установка Docker Compose:
+
+```bash
+mkdir -p $HOME/.docker/cli-plugins
+touch $HOME/.docker/config.json
+sudo curl -sL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m) \
+  -o /usr/local/bin/docker-compose
+# Make executable
+sudo chown root:root /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```

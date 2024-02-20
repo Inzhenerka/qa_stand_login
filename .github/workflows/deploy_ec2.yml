@@ -1,0 +1,40 @@
+name: Deploy webapp to EC2
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/**
+      - app_prod.py
+      - docker-compose.yml
+      - Dockerfile
+      - nginx.conf
+      - requirements.txt
+      - .github/**
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      HOST: 18.201.63.239
+      USERNAME: ec2-user
+      FOLDER: qa_stand_login
+
+    steps:
+      - name: 🔃 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🔃 Restart app
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ env.USERNAME }}
+          port: 22
+          key: ${{ secrets.SSHKEY }}
+          script: |
+            cd ${{ env.FOLDER }}
+            git pull
+            docker-compose down
+            docker-compose up --build -d
+            docker system prune
