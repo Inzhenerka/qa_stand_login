@@ -97,3 +97,15 @@ sudo curl -sL https://github.com/docker/compose/releases/latest/download/docker-
 sudo chown root:root /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```
+
+Установка Git:
+
+```bash
+sudo dnf install git -y
+```
+
+Клонирование репозитория:
+
+```bash
+git clone https://github.com/Inzhenerka/qa_stand_login.git
+```
