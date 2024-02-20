@@ -109,3 +109,9 @@ sudo dnf install git -y
 ```bash
 git clone https://github.com/Inzhenerka/qa_stand_login.git
 ```
+
+Первый запуск certbot для получения SSL-сертификата:
+
+```bash
+docker-compose run --rm certbot certonly --webroot --webroot-path=/var/www/certbot --email info@inzhenerka.tech --agree-tos --no-eff-email --staging --domains qa-stand-login.inzhenerka.tech
+```
