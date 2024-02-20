@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}User details{% endblock %}
+
+{% block content %}
+<div class="card shadow alert alert-danger" role="alert">
+    <div class="card-body">
+        <h2 class="card-title alert-heading text-center mb-4">Вход не выполнен</h2>
+        <div class="mb-3">
+            <p>Извините, ваша попытка входа не удалась. Пожалуйста, проверьте ваше имя пользователя и пароль и попробуйте
+        снова.</p>
+        </div>
+        <a href="/login" class="btn btn-primary w-100">Попробовать снова</a>
+    </div>
+</div>
+{% endblock %}

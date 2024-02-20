@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}User details{% endblock %}
+
+{% block content %}
+<div class="card shadow">
+    <div class="card-body">
+        <h2 class="card-title text-center mb-4">Привет, {{ user.username }}</h2>
+        <div class="mb-3">
+            <h5>Имя: <span class="fw-normal">{{ user.name }}</span></h5>
+            <h5>Должность: <span class="fw-normal">{{ user.jobtitle }}</span></h5>
+            <h5>Возраст: <span class="fw-normal">{{ user.age }}</span></h5>
+            <h5>Описание: <span class="fw-normal">{{ user.description }}</span></h5>
+            <h5>Админ?: <span class="fw-normal">{{ user.admin }}</span></h5>
+        </div>
+        <a href="/logout" class="btn btn-danger w-100">Выйти</a>
+    </div>
+</div>
+{% endblock %}
+
