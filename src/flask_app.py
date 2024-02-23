@@ -72,15 +72,12 @@ def login():
 
 @app.route('/logout')
 def logout():
-    # Here you can add any required logic to clear the session or cookies
-    # For example: session.pop('user_id', None)
     return redirect(url_for('login'))
 
 
 @app.route('/user_details/<username>')
 def user_details(username):
     user = User.query.filter_by(username=username).first_or_404()
-    # Assuming 'user_details.html' is a template that displays user information
     return render_template('user_details.html', user=user)
 
 
@@ -214,7 +211,6 @@ def update_user(username):
         type: string
         required: true
         description: Username of the user
-        example: testuser
       - in: body
         name: body
         schema:
@@ -266,7 +262,6 @@ def delete_user(username):
         type: string
         required: true
         description: Username of the user
-        example: testuser
     responses:
       200:
         description: User deleted
