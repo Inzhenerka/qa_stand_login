@@ -172,7 +172,6 @@ def get_user(username):
         type: string
         required: true
         description: Username of the user
-        example: admin
     responses:
       200:
         description: User details
