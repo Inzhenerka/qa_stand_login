@@ -10,7 +10,7 @@
     <style>
         body {
             /* Example SVG background */
-            background-image: url('static/bug.svg');
+            background-image: url('/static/bug.svg');
             background-repeat: repeat;
             background-size: 20% auto;
             background-color: #e4f1fe;
@@ -27,19 +27,22 @@
 <body>
 <div class="container">
     <!-- Jumbotron-like section -->
-    <div class="px-5 my-4 rounded-3 shadow jumbo">
+    <div class="px-2 px-md-5 my-4 rounded-3 shadow jumbo">
         <div class="container-fluid py-5">
-            <h1 class="h1 fw-bold text-white">
+            <h1 class="mb-4 h1 fw-bold text-white">
                 Стенд курса "Основы QA"
                 от <a href="https://inzhenerka.tech/" class="link-light">inzhenerka.tech</a>
             </h1>
             <p class="col-md-8 fs-4 text-white">
                 Описание и исходный код: <a href="https://github.com/Inzhenerka/qa_stand_login" class="link-light">qa_stand_login</a>
             </p>
+            <p class="col-md-8 fs-4 text-white">
+                Документация API: <a href="/docs" class="link-light">/docs</a>
+            </p>
         </div>
     </div>
     <div class="row justify-content-center">
-        <div class="col-6 col-lg-4">
+        <div class="col col-sm-8 col-md-6 col-lg-4">
             {% block content %}
             <!-- Default content goes here, can be overridden by child templates -->
             {% endblock %}

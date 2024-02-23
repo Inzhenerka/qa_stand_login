@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Swagger UI</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.7/swagger-ui.min.css" >
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.7/swagger-ui-bundle.min.js"> </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/5.11.7/swagger-ui-standalone-preset.min.js"> </script>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script>
+        window.onload = function() {
+            // Build a system
+            const ui = SwaggerUIBundle({
+                url: "/api/spec",
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout"
+            });
+            window.ui = ui;
+        };
+    </script>
+</body>
+</html>

@@ -1,6 +1,8 @@
 from flask import Flask, request, redirect, url_for, render_template, jsonify
+from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_swagger import swagger
 from src.aws.secrets_manager import SecretsManager
 
 sm = SecretsManager()
@@ -11,6 +13,22 @@ app.config['SQLALCHEMY_DATABASE_URI'] = \
     f"postgresql+psycopg://{creds['username']}:{creds['password']}@{creds['host']}/{creds['dbname']}"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
+
+API_KEY = 'API_KEY123'  # FOR DEMO PURPOSES ONLY. DO NOT STORE API KEYS IN CODE!
+
+
+def require_api_key(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Check if 'API_KEY' is in the query parameters
+        # and if it matches the predefined API key
+        if 'API_KEY' in request.args and request.args.get('API_KEY') == API_KEY:
+            return f(*args, **kwargs)
+        else:
+            # If the API key is incorrect or not provided, return 401 Unauthorized
+            return jsonify({"error": "API key is missing or incorrect"}), 401
+
+    return decorated_function
 
 
 class User(db.Model):
@@ -59,8 +77,7 @@ def logout():
     return redirect(url_for('login'))
 
 
-# User details page route
-@app.route('/user/<username>')
+@app.route('/user_details/<username>')
 def user_details(username):
     user = User.query.filter_by(username=username).first_or_404()
     # Assuming 'user_details.html' is a template that displays user information
@@ -69,10 +86,77 @@ def user_details(username):
 
 # REST API to create a new user
 @app.route('/api/users', methods=['POST'])
+@require_api_key
 def create_user():
+    """
+    Create a new user
+    ---
+    definitions:
+      - schema:
+          id: User
+          required:
+            - username
+            - password
+            - name
+          properties:
+            username:
+              type: string
+              description: Unique username
+              example: testuser
+            password:
+              type: string
+              description: Password of user
+              example: password123
+            name:
+              type: string
+              description: name for user in free form
+              example: Автоматизатор Тестович
+            jobtitle:
+              type: string
+              description: job title for user
+              example: Тестировщик
+            age:
+              type: number
+              description: Age of user
+              example: 60
+            description:
+              type: string
+              description: Description of user (comment)
+              example: Лучший тестер в мире
+            admin:
+              type: boolean
+              description: User has admin rights
+              example: false
+    parameters:
+      - in: body
+        name: body
+        schema:
+          $ref: "#/definitions/User"
+    responses:
+      201:
+        description: User created
+      400:
+        description: User already exists
+      401:
+        description: Unauthorized
+    security:
+      - ApiKeyAuth: []
+    """
     data = request.get_json()
+    user = User.query.filter_by(username=data['username']).first()
+    if user:
+        return jsonify({'message': 'User already exists.'}), 400
     hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
-    new_user = User(username=data['username'], password=hashed_password, role=data.get('role', 'user'))
+    new_user = User(
+        username=data['username'],
+        password=hashed_password,
+        name=data['name'],
+        jobtitle=data.get('jobtitle'),
+        age=data.get('age'),
+        description=data.get('description'),
+        admin=data.get('admin', False),
+        readonly=False
+    )
     db.session.add(new_user)
     db.session.commit()
     return jsonify({'message': 'New user created.'}), 201
@@ -80,37 +164,142 @@ def create_user():
 
 # REST API to get user details
 @app.route('/api/users/<username>', methods=['GET'])
+@require_api_key
 def get_user(username):
+    """
+    Get user details
+    ---
+    parameters:
+      - name: username
+        in: path
+        type: string
+        required: true
+        description: Username of the user
+        example: admin
+    responses:
+      200:
+        description: User details
+        schema:
+          $ref: "#/definitions/User"
+      404:
+        description: User not found
+      401:
+        description: Unauthorized
+    security:
+      - ApiKeyAuth: []
+    """
     user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({'message': 'User not found.'}), 404
-    return jsonify({'username': user.username, 'role': user.role})
+    return jsonify({
+        'username': user.username,
+        'name': user.name,
+        'jobtitle': user.jobtitle,
+        'age': user.age,
+        'description': user.description,
+        'admin': user.admin
+    })
 
 
 # REST API to update a user
 @app.route('/api/users/<username>', methods=['PUT'])
+@require_api_key
 def update_user(username):
+    """
+    Update user details
+    ---
+    parameters:
+      - name: username
+        in: path
+        type: string
+        required: true
+        description: Username of the user
+        example: testuser
+      - in: body
+        name: body
+        schema:
+          $ref: "#/definitions/User"
+    responses:
+      200:
+        description: User updated
+      403:
+        description: Cannot modify readonly user
+      404:
+        description: User not found
+      401:
+        description: Unauthorized
+    security:
+      - ApiKeyAuth: []
+    """
     user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({'message': 'User not found.'}), 404
-    if user.role == 'admin':
-        return jsonify({'message': 'Cannot modify admin user.'}), 403
+    if user.readonly:
+        return jsonify({'message': 'Cannot modify readonly user.'}), 403
     data = request.get_json()
-    user.password = generate_password_hash(
-        data['password'], method='pbkdf2:sha256'
-    ) if 'password' in data else user.password
+    if 'password' in data:
+        user.password = generate_password_hash(data['password'], method='pbkdf2:sha256')
+    if 'name' in data:
+        user.name = data['name']
+    if 'jobtitle' in data:
+        user.jobtitle = data['jobtitle']
+    if 'age' in data:
+        user.age = data['age']
+    if 'description' in data:
+        user.description = data['description']
+    if 'admin' in data:
+        user.admin = data['admin']
     db.session.commit()
     return jsonify({'message': 'User updated.'})
 
 
 # REST API to delete a user
 @app.route('/api/users/<username>', methods=['DELETE'])
+@require_api_key
 def delete_user(username):
+    """
+    Delete user
+    ---
+    parameters:
+      - name: username
+        in: path
+        type: string
+        required: true
+        description: Username of the user
+        example: testuser
+    responses:
+      200:
+        description: User deleted
+      403:
+        description: Cannot delete readonly user
+      404:
+        description: User not found
+      401:
+        description: Unauthorized
+    security:
+      - ApiKeyAuth: []
+    """
     user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({'message': 'User not found.'}), 404
-    if user.role == 'admin':
-        return jsonify({'message': 'Cannot delete admin user.'}), 403
+    if user.readonly:
+        return jsonify({'message': 'Cannot delete readonly user.'}), 403
     db.session.delete(user)
     db.session.commit()
     return jsonify({'message': 'User deleted.'})
+
+
+@app.route('/api/spec')
+def spec():
+    swag = swagger(app)
+    swag['info']['title'] = 'QA Stand API (inzhenerka.tech)'
+    swag['info']['description'] = 'Описание API для управления пользователями.' +\
+        '\n\nДля курса "Основы QA" от [inzhenerka.tech](https://inzhenerka.tech/)' +\
+        '\n\n**API KEY: `API_KEY123`**'
+    swag['securityDefinitions'] = {'ApiKeyAuth': {'type': 'apiKey', 'in': 'query', 'name': 'API_KEY'}}
+    return jsonify(swag)
+
+
+@app.route('/docs', methods=['GET'])
+def docs():
+    return render_template('docs.html')

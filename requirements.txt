@@ -5,3 +5,4 @@ waitress==3.0.0
 werkzeug==3.0.1
 boto3==1.34.45
 aws-secretsmanager-caching==1.1.1.5
+flask_swagger==0.2.14
