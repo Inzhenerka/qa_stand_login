@@ -17,7 +17,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      HOST: 18.201.63.239
+      HOST: 54.155.162.211
       USERNAME: ec2-user
       FOLDER: qa_stand_login
 
