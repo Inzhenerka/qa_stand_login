@@ -3,7 +3,7 @@ name: Deploy webapp to EC2
 on:
   push:
     branches:
-      - main
+      - mainOFF
     paths:
       - src/**
       - app_prod.py

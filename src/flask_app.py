@@ -297,3 +297,8 @@ def spec():
 @app.route('/docs', methods=['GET'])
 def docs():
     return render_template('docs.html')
+
+
+@app.route('/health', methods=['GET'])
+def health():
+    return jsonify({'status': 'OK'})
