@@ -12,8 +12,8 @@ permissions:
 env:
   AWS_REGION: eu-west-1
   AWS_IAM_ROLE: 'arn:aws:iam::975050069036:role/ecs-deployment-role'
-  ECR_REPOSITORY: pumproom-ai
-  ECS_SERVICE: pumproom-ai
+  ECR_REPOSITORY: qa-stand-login
+  ECS_SERVICE: qa-stand-login
   ECS_CLUSTER: pumproom
 
 jobs:
