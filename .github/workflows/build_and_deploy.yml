@@ -17,26 +17,25 @@ env:
   ECS_CLUSTER: pumproom
 
 jobs:
-  deploy:
-    name: Deploy
+  build_and_push:
+    name: 🔨 Build and Push Image
     runs-on: ubuntu-latest
     environment: production
-
     steps:
-      - name: Checkout
+      - name: ⬇️ Checkout
         uses: actions/checkout@v4
 
-      - name: Configure AWS credentials
+      - name: 🗝️ Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ env.AWS_IAM_ROLE }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Login to Amazon ECR
+      - name: 🚪 Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build, tag, and push image to Amazon ECR
+      - name: 🏗️ Build, tag, and push image to Amazon ECR
         id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -46,7 +45,32 @@ jobs:
           docker compose push
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-      - name: Force ECS deployment
+  deploy:
+    name: 🔁 Restart ECS Service
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: ⬇️ Checkout
+        uses: actions/checkout@v4
+
+      - name: 🗝️ Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ env.AWS_IAM_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: 🚀 Force ECS deployment
         run: |
           aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
           aws ecs wait services-stable --cluster $ECS_CLUSTER --services $ECS_SERVICE
+
+      - name: ✔️ Verify deployment status
+        run: |
+          rollout=$(aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --query 'services[0].deployments[?status==`PRIMARY`].rolloutState' \
+            --output text)
+          echo "Deployment status: $rollout"
+          [ "$rollout" = "COMPLETED" ] || exit 1

@@ -1,3 +1,4 @@
+from typing import Any
 import json
 import boto3.session
 from aws_secretsmanager_caching import SecretCache, SecretCacheConfig
@@ -11,7 +12,7 @@ class SecretsManager:
         cache_config = SecretCacheConfig()
         self._cache = SecretCache(config=cache_config, client=client)
 
-    def get_secret_value(self, secret_id: str) -> any:
+    def get_secret_value(self, secret_id: str) -> Any:
         value_str: str = self._cache.get_secret_string(secret_id)
-        value: any = json.loads(value_str)
+        value: Any = json.loads(value_str)
         return value

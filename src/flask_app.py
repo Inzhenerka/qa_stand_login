@@ -6,7 +6,7 @@ from flask_swagger import swagger
 from src.aws.secrets_manager import SecretsManager
 
 sm = SecretsManager()
-creds: dict = sm.get_secret_value('qa_stand/postgres/postgres')
+creds: dict = sm.get_secret_value('qa-stand-login/database/credentials')
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = \
