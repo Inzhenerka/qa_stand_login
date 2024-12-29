@@ -303,3 +303,6 @@ def docs():
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({'status': 'OK'})
+
+with app.app_context():
+    db.create_all()
