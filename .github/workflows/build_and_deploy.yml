@@ -67,6 +67,7 @@ jobs:
 
       - name: ✔️ Verify deployment status
         run: |
+          sleep 15
           rollout=$(aws ecs describe-services \
             --cluster ${{ env.ECS_CLUSTER }} \
             --services ${{ env.ECS_SERVICE }} \
