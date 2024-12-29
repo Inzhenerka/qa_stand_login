@@ -32,6 +32,7 @@ def require_api_key(f):
 
 
 class User(db.Model):
+    __table_args__ = {'schema': 'qa_stand'}
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
