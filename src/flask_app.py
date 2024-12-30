@@ -1,16 +1,13 @@
+import os
+
 from flask import Flask, request, redirect, url_for, render_template, jsonify
 from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_swagger import swagger
-from src.aws.secrets_manager import SecretsManager
-
-sm = SecretsManager()
-creds: dict = sm.get_secret_value('qa-stand-login/database/credentials')
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = \
-    f"postgresql+psycopg://{creds['username']}:{creds['password']}@{creds['host']}/{creds['dbname']}"
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URI']
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
