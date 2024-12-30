@@ -2,7 +2,7 @@ version: '3'
 services:
   qa-stand-login:
     build: .
-    image: 975050069036.dkr.ecr.eu-west-1.amazonaws.com/qa-stand-login:${IMAGE_TAG}
+    image: 975050069036.dkr.ecr.eu-west-1.amazonaws.com/qa-stand-login:${IMAGE_TAG:-latest}
     container_name: qa-stand-login
     restart: always
     expose:
