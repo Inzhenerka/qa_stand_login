@@ -1,10 +1,12 @@
 import os
-
 from flask import Flask, request, redirect, url_for, render_template, jsonify
 from functools import wraps
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_swagger import swagger
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URI']
