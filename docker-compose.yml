@@ -6,7 +6,8 @@ services:
     container_name: qa-stand-login
     restart: always
     env_file:
-      - stack.env
+      - path: stack.env
+        required: false
     expose:
       - "80"
     ports:
