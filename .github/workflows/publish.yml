@@ -1,37 +1,44 @@
-name: Deploy to GitHub Container Registry
+name: Deploy to Amazon ECS
 
 on:
   push:
     branches:
       - portainer
 
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  AWS_REGION: eu-west-1
+  AWS_IAM_ROLE: 'arn:aws:iam::975050069036:role/ecs-deployment-role'
+  ECR_REPOSITORY: qa-stand-login-new
+
 jobs:
-  deploy:
+  build_and_push:
+    name: 🔨 Build and Push Image
     runs-on: ubuntu-latest
-    env:
-      IMAGE_NAME: ghcr.io/inzhenerka/qa-stand-login:latest
-
+    environment: production
     steps:
-      - name: Maximize build space
-        uses: AdityaGarg8/remove-unwanted-software@v4.1
-        with:
-          remove-android: 'true'
-          remove-dotnet: 'true'
-          remove-haskell: 'true'
-
-      - name: 🔃 Checkout repository
+      - name: ⬇️ Checkout
         uses: actions/checkout@v4
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3
+      - name: 🗝️ Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          role-to-assume: ${{ env.AWS_IAM_ROLE }}
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Build and Push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: ${{ env.IMAGE_NAME }}
+      - name: 🚪 Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: 🏗️ Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: latest
+        run: |
+          docker compose build
+          docker compose push
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
