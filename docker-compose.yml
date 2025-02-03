@@ -1,15 +1,11 @@
-version: '3'
 services:
   qa-stand-login:
     build: .
-    image: 975050069036.dkr.ecr.eu-west-1.amazonaws.com/qa-stand-login-new:${IMAGE_TAG:-latest}
     container_name: qa-stand-login
     restart: always
     env_file:
-      - path: stack.env
+      - path: .env
         required: false
-    expose:
-      - "80"
     ports:
       - "5000:80"
     volumes:

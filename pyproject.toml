@@ -1,0 +1,19 @@
+[project]
+name = "qa-stand-login"
+version = "0.1.0"
+description = "QA course stand of simple website with authorization"
+requires-python = ">=3.11"
+authors = [
+    { name = "Inzhenerka.Tech", email = "info@inzhenerka.tech" }
+]
+dependencies = [
+    "Flask==3.0.3",
+    "flask_sqlalchemy==3.1.1",
+    "psycopg[binary,pool]==3.1.18",
+    "waitress==3.0.2",
+    "werkzeug==3.0.6",
+    "boto3==1.35.60",
+    "aws-secretsmanager-caching==1.1.3",
+    "flask_swagger==0.2.14",
+    "python-dotenv==1.0.1",
+]

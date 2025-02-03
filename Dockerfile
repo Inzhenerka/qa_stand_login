@@ -1,16 +1,15 @@
 FROM python:3.11.10-slim-bookworm
+COPY --from=ghcr.io/astral-sh/uv:0.5.24 /uv /uvx /bin/
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy the current directory contents into the container at /app
-COPY . /app
+COPY ./src /app/src
+COPY ./app_prod.py /app/
+COPY ./pyproject.toml /app/
+COPY ./uv.lock /app/
 
-# Install any needed packages specified in requirements.txt
-RUN pip install --trusted-host pypi.python.org -r requirements.txt
+RUN uv sync --frozen --no-dev --no-cache
 
-# Make port 5000 available to the world outside this container
 EXPOSE 80
 
-# Run app_dev.py when the container launches
-CMD ["python", "app_prod.py"]
+CMD ["uv", "run", "app_prod.py"]
